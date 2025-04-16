@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmSage - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="logo">
+            <a href="/" title="FilmSage Home">
+                <i class="fas fa-film"></i> 
+                <span>FilmSage</span> <!-- Optional: Add text label -->
+            </a>
+        </div>
+        <div class="nav-links">
+            <!-- Links removed as requested -->
+        </div>
+        <div class="user-icon dropdown"> <!-- Added dropdown class -->
+            <i class="fas fa-user dropdown-toggle" id="profileIcon" title="Profile options"></i> <!-- Added id and dropdown-toggle class -->
+            <div class="dropdown-menu" id="profileDropdown"> <!-- Added id -->
+                <p class="user-info">Hi, <span sec:authentication="name">User</span>!</p> 
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add separate toggle buttons for each sidebar with text labels -->
+    <button id="chatToggle" class="sidebar-toggle chat-toggle sidebar-visible" title="Toggle Chat History" onclick="toggleChatSidebar()">
+        <i class="fas fa-comments"></i> <span>Chat History</span>
+    </button>
+
+    <button id="watchlistToggle" class="sidebar-toggle watchlist-toggle sidebar-visible" title="Toggle Watchlist" onclick="toggleWatchlistSidebar()">
+        <i class="fas fa-list"></i> <span>Watchlist</span>
+    </button>
+
+    <!-- Chat History Sidebar -->
+    <div class="chat-history-sidebar" id="chatHistorySidebar">
+        <div class="sidebar-header">
+            <div class="search-container">
+                <input type="text" placeholder="Search conversations..." id="searchChat">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+        <div class="chat-history-list" id="chatHistoryList">
+            <!-- Chat history items will be added dynamically -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Trending Movies Carousel - Moved inside main content -->
+        <div class="trending-movies-section">
+            <h2 class="section-title">Trending Movies</h2>
+            <div class="trending-carousel">
+                <div class="carousel-container" id="trendingCarousel">
+                    <!-- Trending movies will be loaded here dynamically -->
+                </div>
+                <div class="carousel-controls">
+                    <button class="carousel-control prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
+                    <div class="carousel-indicators" id="carouselIndicators">
+                        <!-- Indicators will be added dynamically -->
+                    </div>
+                    <button class="carousel-control next" id="carouselNext"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keep only the Let's Chat button inside the content -->
+        <div class="chat-button-container">
+            <button id="openChatBtn" class="open-chat-btn">
+                <i class="fas fa-comments"></i> Let's Chat
+            </button>
+        </div>
+    </div>
+
+    <!-- Watchlist Sidebar -->
+    <div class="watchlist-sidebar">
+        <div class="watchlist-header">
+            <h2>Watchlist</h2>
+        </div>
+        <div class="watchlist-content" id="watchlistContent">
+            <!-- Watchlist items will be added dynamically -->
+        </div>
+    </div>
+
+    <!-- Move the chat overlay outside all other elements, just before the closing body tag -->
+    <!-- Chat Overlay -->
+    <div class="chat-overlay" id="chatOverlay">
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <h3>Chat with FilmSage</h3>
+                <button id="closeChatBtn" class="close-chat-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Ask about movies, directors, or recommendations..." />
+                <button id="sendButton" onclick="sendMessage()">
+                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Details Overlay wrapping the existing Movie Modal -->
+    <div id="detailsOverlay" class="details-overlay">
+        <!-- Existing Movie Modal -->
+        <div id="movieModal" class="movie-modal">
+            <div class="modal-content">
+                <button class="close-modal-btn" onclick="closeMovieDetailsPopup()">&times; Close</button>
+                <span class="close-modal" onclick="closeMovieDetailsPopup()">&times;</span>
+                <div class="movie-header">
+                    <div class="movie-poster">
+                        <img id="modalMoviePoster" src="" alt="Movie Poster">
+                    </div>
+                    <div class="movie-info">
+                        <h2 id="modalMovieTitle"></h2>
+                        <div>
+                            <span id="modalMovieYear"></span> | 
+                            <span id="modalMovieRating"></span>
+                        </div>
+                        <div class="movie-genres" id="modalMovieGenres"></div>
+                        <p id="modalMovieOverview"></p>
+                    </div>
+                </div>
+                <div class="movie-cast">
+                    <h3>Cast</h3>
+                    <div class="cast-list" id="modalMovieCast"></div>
+                </div>
+                <div class="movie-trailer">
+                    <h3>Trailer</h3>
+                    <div id="modalMovieTrailer"></div>
+                </div>
+                <div class="movie-ratings">
+                    <h3>User Ratings</h3>
+                    <div class="rating-stats">
+                        <div>
+                            <span class="average-rating" id="modalAverageRating">0.0</span> / 5.0
+                            <span class="rating-count">(<span id="modalRatingCount">0</span> ratings)</span>
+                        </div>
+                        <div class="user-rating">
+                            <h4>Rate this movie</h4>
+                            <div class="stars">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                            <textarea id="reviewText" placeholder="Write your review here (optional)"></textarea>
+                            <button id="submitRating" class="submit-rating-btn">Submit Rating</button>
+                        </div>
+                    </div>
+                    <div id="movieReviews"></div>
+                </div>
+                <div class="similar-movies">
+                    <h3>Similar Movies</h3>
+                    <div class="similar-movies-list" id="modalSimilarMovies"></div>
+                </div>
+            </div>
+        </div>
+        <!-- End Existing Movie Modal -->
+    </div>
+    <!-- End Details Overlay -->
+
+    <script src="/js/script.js"></script>
+</body>
+</html> 

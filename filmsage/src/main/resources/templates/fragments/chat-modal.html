@@ -1,0 +1,303 @@
+<!-- Assuming this is where the chat modal HTML fragment is defined -->
+<div class="chat-modal" id="chatModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Chat with FilmSage</h2>
+            <span class="close-button" onclick="closeChatModal()">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Add chat sidebar for history -->
+            <div class="chat-sidebar" id="chatHistorySidebar">
+                <div class="sidebar-header">
+                    <h3>Chat History</h3>
+                    <div class="search-container">
+                        <input type="text" id="chatHistorySearch" placeholder="Search conversations...">
+                    </div>
+                </div>
+                <div class="chat-history-list" id="chatHistoryList">
+                    <!-- Conversations will be loaded here -->
+                    <div class="no-conversations">No saved conversations yet</div>
+                </div>
+            </div>
+            
+            <!-- Main chat area -->
+            <div class="chat-main-content">
+                <div class="chat-title-bar">
+                    <span id="currentConversationTitle">New Conversation</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chatbot-message">
+                        Hello! I'm FilmSage, your movie assistant. You can ask me about movies, directors, or get personalized recommendations. How can I help you today?
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="userInput" placeholder="Ask about movies, directors, or recommendations..." />
+                    <button id="sendButton" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Chat modal styles */
+    .chat-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+    }
+    
+    .modal-content {
+        background-color: #1f1f1f;
+        margin: 5% auto;
+        width: 90%;
+        max-width: 1000px;
+        height: 80%;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #b22222;
+        color: white;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+    
+    .close-button {
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .modal-body {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+    }
+    
+    /* Chat sidebar styles */
+    .chat-sidebar {
+        width: 250px;
+        background-color: #252525;
+        border-right: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sidebar-header {
+        padding: 15px;
+        border-bottom: 1px solid #333;
+    }
+    
+    .sidebar-header h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #ccc;
+    }
+    
+    .search-container {
+        margin-top: 10px;
+    }
+    
+    #chatHistorySearch {
+        width: 100%;
+        padding: 8px;
+        background-color: #333;
+        border: none;
+        border-radius: 4px;
+        color: white;
+    }
+    
+    .chat-history-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    
+    .chat-history-item {
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        background-color: #2a2a2a;
+    }
+    
+    .chat-history-item:hover {
+        background-color: #333;
+    }
+    
+    .chat-history-item.active {
+        background-color: #3a3a3a;
+        border-left: 3px solid #b22222;
+    }
+    
+    .chat-history-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #eee;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .chat-history-preview {
+        font-size: 12px;
+        color: #aaa;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .chat-history-timestamp {
+        font-size: 11px;
+        color: #777;
+        margin-top: 5px;
+    }
+    
+    .no-conversations {
+        color: #777;
+        text-align: center;
+        padding: 20px 0;
+        font-style: italic;
+    }
+    
+    /* Main chat area */
+    .chat-main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .chat-title-bar {
+        padding: 10px 15px;
+        border-bottom: 1px solid #333;
+        background-color: #2a2a2a;
+    }
+    
+    #currentConversationTitle {
+        font-weight: bold;
+        color: #ddd;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chatbot-message, .user-message {
+        max-width: 80%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+    }
+    
+    .chatbot-message {
+        background-color: #2e2e2e;
+        color: #eee;
+        align-self: flex-start;
+        border-bottom-left-radius: 0;
+    }
+    
+    .user-message {
+        background-color: #b22222;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
+    }
+    
+    .chat-input {
+        display: flex;
+        padding: 10px;
+        background-color: #2a2a2a;
+        border-top: 1px solid #333;
+    }
+    
+    #userInput {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 4px;
+        background-color: #333;
+        color: white;
+        margin-right: 10px;
+    }
+    
+    #sendButton {
+        padding: 12px 16px;
+        background-color: #b22222;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    #sendButton:hover {
+        background-color: #d42c2c;
+    }
+    
+    /* Movie action prompt */
+    .movie-action-prompt {
+        background-color: #333;
+        padding: 12px;
+        border-radius: 4px;
+        margin: 10px 0;
+        text-align: center;
+        font-style: italic;
+        color: #aaa;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            height: 90%;
+            margin: 5% auto;
+        }
+        
+        .chat-sidebar {
+            width: 200px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .modal-content {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            border-radius: 0;
+        }
+        
+        .chat-sidebar {
+            display: none; /* Hide sidebar on very small screens */
+        }
+    }
+</style> 
